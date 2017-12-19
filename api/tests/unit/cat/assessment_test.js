@@ -240,7 +240,7 @@ describe('Unit | Model | Assessment', function() {
       expect([...assessment.failedSkills]).to.be.deep.equal([web3forChallengeOne]);
     });
 
-    it('should return [web3,web4] when challenge requiring web3,web4 was skipped', () => {
+    it('should return [web3, web4] when challenge requiring web3, web4 was skipped', () => {
       // given
       const web3 = new Skill('web3');
       const web4 = new Skill('web4');
@@ -570,6 +570,44 @@ describe('Unit | Model | Assessment', function() {
       // then
       expect(assessment.nextChallenge).to.be.equal(firstChallenge);
       firstChallengeStub.restore();
+    });
+
+    it('should return an easier challenge if user skipped previous challenge', function() {
+      // given
+      const web1 = new Skill('web1');
+      const web2 = new Skill('web2');
+      const web3 = new Skill('web3');
+      const ch1 = new Challenge('rec1', 'validé', [web1]);
+      const ch2a = new Challenge('rec2a', 'validé', [web2]);
+      const ch2b = new Challenge('rec2b', 'validé', [web2]);
+      const ch3 = new Challenge('rec3', 'validé', [web3]);
+      const course = new Course([ch1, ch2a, ch2b, ch3]);
+      const answer = new Answer(ch2a, Answer.SKIPPED);
+      const assessment = new Assessment(course, [answer]);
+
+      // then
+      expect(assessment.nextChallenge.hardestSkill.difficulty).to.be.equal(1);
+    });
+
+    it('should return any challenge at random if several challenges have equal reward at the middle of the test', function() {
+      // given
+      const web1 = new Skill('web1');
+      const web2 = new Skill('web2');
+      const web3 = new Skill('web3');
+      const url3 = new Skill('url3');
+      const ch1 = new Challenge('rec1', 'validé', [web1]);
+      const ch2a = new Challenge('rec2a', 'validé', [web2]);
+      const ch3a = new Challenge('rec3a', 'validé', [web3]);
+      const ch3b = new Challenge('rec3b', 'validé', [web3]);
+      const ch3c = new Challenge('rec3c', 'validé', [url3]);
+      const course = new Course([ch1, ch2a, ch3a, ch3b, ch3c]);
+      const answer = new Answer(ch2a, Answer.OK);
+      const assessment = new Assessment(course, [answer]);
+
+      // then
+      [1, 2, 3, 4, 5].forEach(() => {
+        expect(assessment.nextChallenge.hardestSkill.difficulty).to.be.equal(3);
+      });
     });
   });
 
