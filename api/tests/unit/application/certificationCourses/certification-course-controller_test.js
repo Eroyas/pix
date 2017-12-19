@@ -6,11 +6,10 @@ const CertificationCourseSerializer = require('../../../../lib/infrastructure/se
 const UserService = require('../../../../lib/domain/services/user-service');
 const CertificationChallengesService = require('../../../../lib/domain/services/certification-challenges-service');
 const assessmentRepository = require('../../../../lib/infrastructure/repositories/assessment-repository');
-const answersRepository = require('../../../../lib/infrastructure/repositories/answer-repository');
-const certificationChallengesRepository = require('../../../../lib/infrastructure/repositories/certification-challenge-repository');
 const certificationService = require('../../../../lib/domain/services/certification-service');
-const Assessment = require('../../../../lib/domain/models/data/assessment');
 const certificationCourseSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/certification-course-serializer');
+const logger = require('../../../../lib/infrastructure/logger');
+const Boom = require('boom');
 
 describe('Unit | Controller | certification-course-controller', function() {
 
@@ -98,101 +97,80 @@ describe('Unit | Controller | certification-course-controller', function() {
   });
 
   describe('#getResult', () => {
-    const answersByAssessments = [{ challenge: 'challenge1', result: 'ok' }];
-    const challengesByCertificationId = [{ challenge: 'challenge1', courseId: '2' }];
-    const listOfCompetences = [{
-      id: 'competence1',
-      courseId: 'course1',
-      pixScore: '20',
-      challenges: [{ id: 'challenge1' }]
-    }];
-    const score = 20;
+
+    const certificationCourseId = 1245;
+    const certificationScore = 156;
+    const boomResponseForbBadImplementation = { message: 'Bad Implementation' };
+
     const request = {
       params: {
-        id: 'course_id'
+        id: certificationCourseId
       }
     };
+
     beforeEach(() => {
-      const assessment = new Assessment({ id: 'assessment_id', userId: 'user_id' });
       replyStub = sinon.stub().returns({ code: codeStub });
 
       sandbox = sinon.sandbox.create();
-      sandbox.stub(assessmentRepository, 'getByCertificationCourseId').resolves(assessment);
-      sandbox.stub(answersRepository, 'findByAssessment').resolves(answersByAssessments);
-      sandbox.stub(certificationChallengesRepository, 'findByCertificationCourseId').resolves(challengesByCertificationId);
-      sandbox.stub(UserService, 'getProfileToCertify').resolves(listOfCompetences);
-      sandbox.stub(certificationService, 'getResult').resolves(score);
-
+      sandbox.stub(certificationService, 'getCertificationResult').resolves(certificationScore);
+      sandbox.stub(logger, 'error');
+      sandbox.stub(Boom, 'badImplementation').returns(boomResponseForbBadImplementation);
     });
 
     afterEach(() => {
       sandbox.restore();
     });
 
-    it('should call Assessment Repository to get Assessment by CertificationCourseId', function() {
+    it('should call certification Service to compute score', () => {
       // when
       const promise = CertificationCourseController.getResult(request, replyStub);
 
       // then
       return promise.then(() => {
-        sinon.assert.calledOnce(assessmentRepository.getByCertificationCourseId);
-        sinon.assert.calledWith(assessmentRepository.getByCertificationCourseId, 'course_id');
+        sinon.assert.calledOnce(certificationService.getCertificationResult);
+        sinon.assert.calledWith(certificationService.getCertificationResult, certificationCourseId);
       });
     });
 
-    it('should call Answers Repository to get Answers of certification', function() {
-      // when
-      const promise = CertificationCourseController.getResult(request, replyStub);
-
-      // then
-      return promise.then(() => {
-        sinon.assert.calledOnce(answersRepository.findByAssessment);
-        sinon.assert.calledWith(answersRepository.findByAssessment, 'assessment_id');
-      });
-    });
-
-    it('should call Certification Challenges Repository to find challenges by certification id', function() {
-      // when
-      const promise = CertificationCourseController.getResult(request, replyStub);
-
-      // then
-      return promise.then(() => {
-        sinon.assert.calledOnce(certificationChallengesRepository.findByCertificationCourseId);
-        sinon.assert.calledWith(certificationChallengesRepository.findByCertificationCourseId, 'course_id');
-      });
-    });
-
-    it('should call User Service to get ProfileToCertify', function() {
-      // when
-      const promise = CertificationCourseController.getResult(request, replyStub);
-
-      // then
-      return promise.then(() => {
-        sinon.assert.calledOnce(UserService.getProfileToCertify);
-        sinon.assert.calledWith(UserService.getProfileToCertify, 'user_id');
-      });
-    });
-
-    it('should call certification Service to compute score', function() {
-      // when
-      const promise = CertificationCourseController.getResult(request, replyStub);
-
-      // then
-      return promise.then(() => {
-        sinon.assert.calledOnce(certificationService.getResult);
-        sinon.assert.calledWith(certificationService.getResult, answersByAssessments, challengesByCertificationId, listOfCompetences);
-      });
-    });
-
-    it('should reply the score', function() {
-
+    it('should reply the score', () => {
       // when
       const promise = CertificationCourseController.getResult(request, replyStub);
 
       // then
       return promise.then(() => {
         sinon.assert.calledOnce(replyStub);
-        sinon.assert.calledWith(replyStub, score);
+        sinon.assert.calledWith(replyStub, certificationScore);
+      });
+    });
+
+    context('when the retrieving result is failing', () => {
+      it('should log the error', () => {
+        // given
+        const error = new Error('Unexpected error');
+        certificationService.getCertificationResult.rejects(error);
+
+        // when
+        const promise = CertificationCourseController.getResult(request, replyStub);
+
+        // then
+        return promise.then(() => {
+          sinon.assert.calledWith(logger.error, error);
+        });
+      });
+
+      it('should return a bad implementation error', () => {
+        // given
+        const error = new Error('Unexpected error');
+        certificationService.getCertificationResult.rejects(error);
+
+        // when
+        const promise = CertificationCourseController.getResult(request, replyStub);
+
+        // then
+        return promise.then(() => {
+          sinon.assert.calledOnce(Boom.badImplementation);
+          sinon.assert.calledWith(replyStub, boomResponseForbBadImplementation);
+        });
       });
     });
   });
