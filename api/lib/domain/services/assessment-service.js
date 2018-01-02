@@ -156,9 +156,9 @@ function getNextChallengeForCertificationCourse(assessment) {
 
 module.exports = {
   getAssessmentNextChallengeId,
+  getNextChallengeForCertificationCourse,
   fetchAssessment,
   isAssessmentCompleted,
   isPreviewAssessment,
-  isCertificationAssessment,
-  getNextChallengeForCertificationCourse
+  isCertificationAssessment
 };
