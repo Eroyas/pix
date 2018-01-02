@@ -112,14 +112,11 @@ module.exports = {
 
               let promise = Promise.resolve();
               if (assessmentService.isCertificationAssessment(assessmentPix)) {
-                promise = certificationCourseRepository.updateStatus('completed', assessmentPix.get('courseId'));
+                promise = certificationCourseRepository.updateStatus('completed', assessmentPix.courseId);
               }
 
-              // XXX: successRate should not be saved in DB.
-              assessmentPix.unset('successRate');
-
               return promise
-                .then(() => assessmentPix.save())
+                .then(() => assessmentRepository.save(assessmentPix))
                 .then(() => skillsService.saveAssessmentSkills(skills));
             })
             .then(() => {

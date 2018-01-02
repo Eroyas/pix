@@ -11,7 +11,7 @@ const answerRepository = require('../../../../lib/infrastructure/repositories/an
 const skillRepository = require('../../../../lib/infrastructure/repositories/skill-repository');
 const competenceRepository = require('../../../../lib/infrastructure/repositories/competence-repository');
 
-const Assessment = require('../../../../lib/domain/models/data/assessment');
+const Assessment = require('../../../../lib/domain/models/Assessment');
 const Challenge = require('../../../../lib/domain/models/Challenge');
 const CertificationChallenge = require('../../../../lib/domain/models/CertificationChallenge');
 
@@ -29,7 +29,7 @@ function _buildChallenge(challengeId, skills) {
 function _buildAssessmentForCourse(courseId, assessmentId = 'assessment_id') {
   const assessment = new Assessment({ id: assessmentId });
   if (courseId) {
-    assessment.set('courseId', courseId);
+    assessment.courseId = courseId;
   }
   return assessment;
 }
@@ -103,7 +103,7 @@ describe('Unit | Domain | Services | assessment', () => {
     it('Should reject with a AssessmentEndedError when the course is a preview', () => {
       // given
       const assessment = _buildAssessmentForCourse('null22');
-      assessment.set('type', 'PREVIEW');
+      assessment.type = 'PREVIEW';
 
       // when
       const promise = service.getAssessmentNextChallengeId(assessment, '1st_challenge');
@@ -205,8 +205,8 @@ describe('Unit | Domain | Services | assessment', () => {
       // then
       return promise
         .then(({ assessmentPix }) => {
-          expect(assessmentPix.get('id')).to.equal(ASSESSMENT_ID);
-          expect(assessmentPix.get('courseId')).to.deep.equal(PREVIEW_COURSE_ID);
+          expect(assessmentPix.id).to.equal(ASSESSMENT_ID);
+          expect(assessmentPix.courseId).to.deep.equal(PREVIEW_COURSE_ID);
         });
     });
 
@@ -235,9 +235,9 @@ describe('Unit | Domain | Services | assessment', () => {
           // then
           return promise
             .then(({ assessmentPix, skills }) => {
-              expect(assessmentPix.get('estimatedLevel')).to.equal(0);
-              expect(assessmentPix.get('pixScore')).to.equal(0);
-              expect(assessmentPix.get('successRate')).to.equal(100);
+              expect(assessmentPix.estimatedLevel).to.equal(0);
+              expect(assessmentPix.pixScore).to.equal(0);
+              expect(assessmentPix.successRate).to.equal(100);
               expect(skills).to.be.undefined;
             });
         });
@@ -266,8 +266,8 @@ describe('Unit | Domain | Services | assessment', () => {
           // then
           return promise
             .then(({ assessmentPix, skills }) => {
-              expect(assessmentPix.get('estimatedLevel')).to.equal(0);
-              expect(assessmentPix.get('pixScore')).to.equal(0);
+              expect(assessmentPix.estimatedLevel).to.equal(0);
+              expect(assessmentPix.pixScore).to.equal(0);
               expect(skills).to.be.undefined;
             });
         });
@@ -331,9 +331,9 @@ describe('Unit | Domain | Services | assessment', () => {
             // then
             return promise
               .then(({ assessmentPix, skills }) => {
-                expect(assessmentPix.get('estimatedLevel')).to.equal(0);
-                expect(assessmentPix.get('pixScore')).to.equal(0);
-                expect(assessmentPix.get('successRate')).to.equal(50);
+                expect(assessmentPix.estimatedLevel).to.equal(0);
+                expect(assessmentPix.pixScore).to.equal(0);
+                expect(assessmentPix.successRate).to.equal(50);
                 expect(skills).to.be.undefined;
               });
           });
@@ -368,9 +368,9 @@ describe('Unit | Domain | Services | assessment', () => {
             // then
             return promise
               .then(({ assessmentPix, skills }) => {
-                expect(assessmentPix.get('pixScore')).to.equal(17);
-                expect(assessmentPix.get('estimatedLevel')).to.equal(2);
-                expect(assessmentPix.get('successRate')).to.equal(50);
+                expect(assessmentPix.pixScore).to.equal(17);
+                expect(assessmentPix.estimatedLevel).to.equal(2);
+                expect(assessmentPix.successRate).to.equal(50);
                 expect(skills.assessmentId).to.equal(ASSESSMENT_ID);
               });
           });
@@ -454,9 +454,9 @@ describe('Unit | Domain | Services | assessment', () => {
           // then
           return promise
             .then(({ assessmentPix, skills }) => {
-              expect(assessmentPix.get('estimatedLevel')).to.equal(0);
-              expect(assessmentPix.get('pixScore')).to.equal(0);
-              expect(assessmentPix.get('successRate')).to.equal(50);
+              expect(assessmentPix.estimatedLevel).to.equal(0);
+              expect(assessmentPix.pixScore).to.equal(0);
+              expect(assessmentPix.successRate).to.equal(50);
               expect(skills).to.be.undefined;
             });
         });
