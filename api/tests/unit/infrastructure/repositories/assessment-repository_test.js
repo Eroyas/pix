@@ -108,7 +108,7 @@ describe('Unit | Repository | assessmentRepository', () => {
     });
   });
 
-  describe('#findLastCompletedAssessmentsByUser', () => {
+  describe('#findLastCompletedAssessmentsForEachCoursesByUser', () => {
     const assessmentsInDb = [{
       id: 1,
       userId: 2,
@@ -256,9 +256,12 @@ describe('Unit | Repository | assessmentRepository', () => {
       // Then
       return promise.then((assessments) => {
         expect(assessments).to.have.lengthOf(2);
+
+        expect(assessments[0]).to.be.an.instanceOf(Assessment);
+        expect(assessments[1]).to.be.an.instanceOf(Assessment);
+
         expect(assessments[0].id).to.equal(COMPLETED_ASSESSMENT_A_ID);
         expect(assessments[1].id).to.equal(COMPLETED_ASSESSMENT_B_ID);
-
       });
     });
 
@@ -373,9 +376,11 @@ describe('Unit | Repository | assessmentRepository', () => {
   });
 
   describe('#getByCertificationCourseId', () => {
+
     let fetchStub;
+
     beforeEach(() => {
-      fetchStub = sinon.stub().resolves();
+      fetchStub = sinon.stub().resolves(new BookshelfAssessment());
       sinon.stub(BookshelfAssessment, 'where').returns({
         fetch: fetchStub
       });

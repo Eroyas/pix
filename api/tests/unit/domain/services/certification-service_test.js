@@ -8,7 +8,7 @@ const UserService = require('../../../../lib/domain/services/user-service');
 const assessmentRepository = require('../../../../lib/infrastructure/repositories/assessment-repository');
 const answersRepository = require('../../../../lib/infrastructure/repositories/answer-repository');
 const certificationChallengesRepository = require('../../../../lib/infrastructure/repositories/certification-challenge-repository');
-const Assessment = require('../../../../lib/domain/models/data/assessment');
+const Assessment = require('../../../../lib/domain/models/assessment');
 
 function _buildAnswer(challengeId, result) {
   return new Answer({ id: 'answer_id', challengeId, result });
@@ -163,7 +163,7 @@ describe('Unit | Service | Certification Service', function() {
       // then
       return promise.then(() => {
         sinon.assert.calledOnce(answersRepository.findByAssessment);
-        sinon.assert.calledWith(answersRepository.findByAssessment, certificationAssessement.get('id'));
+        sinon.assert.calledWith(answersRepository.findByAssessment, certificationAssessement.id);
       });
     });
 
@@ -185,7 +185,7 @@ describe('Unit | Service | Certification Service', function() {
       // then
       return promise.then(() => {
         sinon.assert.calledOnce(UserService.getProfileToCertify);
-        sinon.assert.calledWith(UserService.getProfileToCertify, certificationAssessement.get('userId'));
+        sinon.assert.calledWith(UserService.getProfileToCertify, certificationAssessement.userId);
       });
     });
 

@@ -100,9 +100,9 @@ module.exports = {
 
     return assessmentRepository.getByCertificationCourseId(certificationCourseId)
       .then((assessment) => {
-        userId = assessment.get('userId');
+        userId = assessment.userId;
 
-        return answersRepository.findByAssessment(assessment.get('id'));
+        return answersRepository.findByAssessment(assessment.id);
       })
       .then((answersByAssessments) => {
         listAnswers = answersByAssessments;

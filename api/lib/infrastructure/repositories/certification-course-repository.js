@@ -1,5 +1,5 @@
 const CertificationCourseBookshelf = require('../../domain/models/data/certification-course');
-const AssessmentBookshelf = require('../../domain/models/data/assessment');
+const BookshelfAssessment = require('../../domain/models/data/assessment');
 const CertificationCourse = require('../../domain/models/CertificationCourse');
 
 function _toDomain(model) {
@@ -33,7 +33,7 @@ module.exports = {
     return getCertificationCoursePromise
       .then((foundCertificationCourse) => {
         certificationCourse = foundCertificationCourse;
-        return AssessmentBookshelf.where({ courseId: id, userId: certificationCourse.userId }).fetch();
+        return BookshelfAssessment.where({ courseId: id, userId: certificationCourse.userId }).fetch();
       }).then((assessment) => {
         certificationCourse.assessment = assessment.toJSON();
         return certificationCourse;

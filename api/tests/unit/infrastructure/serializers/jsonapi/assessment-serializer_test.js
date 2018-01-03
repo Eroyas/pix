@@ -13,7 +13,6 @@ describe('Unit | Serializer | JSONAPI | assessment-serializer', function() {
       courseId: 'course_id',
       successRate: 24,
       type: 'charade'
-
     });
 
     jsonAssessment = {
